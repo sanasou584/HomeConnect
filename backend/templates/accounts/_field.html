@@ -1,0 +1,24 @@
+<div class="flex flex-col gap-1.5">
+  <label class="font-label-lg text-label-lg text-on-surface" for="{{ field.id_for_label }}">{{ label }}</label>
+  <div class="relative flex items-center">
+    <span class="material-symbols-outlined absolute left-3 text-outline text-[20px] pointer-events-none">{{ icon }}</span>
+    <input
+      class="w-full h-11 pl-10 {% if type == 'password' %}pr-11{% else %}pr-4{% endif %} bg-surface-container-lowest text-on-surface rounded-xl placeholder:text-outline/70 font-body-md text-body-md focus:bg-surface-container-low transition-colors outline-none shadow-sm {% if field.errors %}ring-2 ring-error{% endif %}"
+      id="{{ field.id_for_label }}"
+      name="{{ field.html_name }}"
+      type="{{ type|default:'text' }}"
+      value="{% if type != 'password' %}{{ field.value|default:'' }}{% endif %}"
+      placeholder="{{ placeholder }}"
+      autocomplete="{{ autocomplete }}"
+      required/>
+    {% if type == 'password' %}
+    <button type="button" onclick="togglePwd(this)" aria-label="Afficher ou masquer le mot de passe"
+            class="absolute right-3 text-outline hover:text-on-surface p-1 transition-colors">
+      <span class="material-symbols-outlined text-[20px]">visibility</span>
+    </button>
+    {% endif %}
+  </div>
+  {% for error in field.errors %}
+    <p class="font-label-md text-label-md text-error">{{ error }}</p>
+  {% endfor %}
+</div>

@@ -1,0 +1,12 @@
+{% for message in messages %}
+  <div class="mb-4 flex items-start gap-2 p-3 rounded-xl text-sm
+    {% if message.tags == 'success' %}bg-secondary-container text-on-secondary-container
+    {% elif message.tags == 'error' %}bg-error-container text-on-error-container
+    {% elif message.tags == 'warning' %}bg-amber-100 text-amber-900
+    {% else %}bg-blue-100 text-blue-900{% endif %}">
+    <span class="material-symbols-outlined text-[20px]">
+      {% if message.tags == 'success' %}check_circle{% elif message.tags == 'error' %}error{% else %}info{% endif %}
+    </span>
+    <span>{{ message }}</span>
+  </div>
+{% endfor %}

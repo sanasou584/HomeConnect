@@ -1,0 +1,523 @@
+{% extends "base_provider.html" %}
+{% block title %}{% if object %}Modifier le service{% else %}Nouveau service{% endif %} · HomeConnect{% endblock %}
+
+{% block content %}
+<!-- Fil d'Ariane & actions -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm mb-space-lg">
+  <div class="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md">
+    <a class="hover:text-primary transition-colors flex items-center gap-1" href="{% url 'home' %}"><span class="material-symbols-outlined text-[16px]">home</span>Accueil</a>
+    <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+    <a class="hover:text-primary transition-colors" href="{% url 'service_list' %}">Espace Prestataire</a>
+    <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+    <a class="hover:text-primary transition-colors" href="{% url 'service_list' %}">Mes services</a>
+    <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+    <span class="text-primary font-semibold">{% if object %}Modifier le service{% else %}Nouveau service{% endif %}</span>
+  </div>
+  <div class="flex items-center gap-space-sm">
+    <a href="{% url 'service_list' %}" class="px-space-md py-space-xs rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-all flex items-center gap-1 shadow-sm">
+      <span class="material-symbols-outlined text-[18px]">close</span>Annuler et revenir
+    </a>
+    <button type="button" onclick="submitAs('draft')" class="px-space-md py-space-xs rounded-xl bg-surface-container-highest hover:bg-surface-container-high text-primary font-label-md text-label-md transition-all flex items-center gap-1 shadow-sm">
+      <span class="material-symbols-outlined text-[18px]">bookmark</span>Enregistrer en brouillon
+    </button>
+  </div>
+</div>
+
+<!-- Titre -->
+<div class="mb-space-xl">
+  <div class="flex items-center gap-space-xs mb-1">
+    <span class="px-space-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold uppercase tracking-wider">Étape de publication</span>
+    <span class="text-on-surface-variant font-body-sm text-body-sm">• Éligibilité Instant-Match</span>
+  </div>
+  <h1 class="font-headline-xl text-headline-xl text-primary tracking-tight">{% if object %}Modifier le service{% else %}Créer un nouveau service{% endif %}</h1>
+  <p class="font-body-lg text-body-lg text-on-surface-variant mt-1 max-w-3xl">
+    Définissez votre prestation, vos tarifs et vos conditions pour être automatiquement proposé aux clients de votre secteur géographique.
+  </p>
+</div>
+
+{% if form.errors %}
+<div class="mb-space-lg flex items-start gap-space-xs p-space-md rounded-xl bg-error-container text-on-error-container font-body-sm text-body-sm">
+  <span class="material-symbols-outlined text-[20px]">error</span>
+  <span>Certains champs sont à corriger : voir les messages en rouge ci-dessous.</span>
+</div>
+{% endif %}
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+
+  <!-- COLONNE GAUCHE -->
+  <div class="lg:col-span-8">
+    <form id="service-form" method="post" class="space-y-space-xl">
+      {% csrf_token %}
+      <input type="hidden" name="action" id="actionInput" value="publish">
+      <input type="hidden" name="category" id="catInput" value="{{ form.category.value|default:'plomberie' }}">
+      <input type="hidden" name="pricing_type" id="pricingInput" value="{{ form.pricing_type.value|default:'horaire' }}">
+
+      <!-- Section 1 -->
+      <section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-space-lg">
+        <div class="flex items-center justify-between pb-space-sm bg-surface-container-low -mx-space-lg -mt-space-lg px-space-lg py-space-md rounded-t-xl">
+          <div class="flex items-center gap-space-sm">
+            <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md text-label-md font-bold">1</div>
+            <div>
+              <h2 class="font-headline-sm text-headline-sm text-primary">Informations générales du service</h2>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Décrivez la nature technique de votre intervention</p>
+            </div>
+          </div>
+          <span class="font-label-sm text-label-sm bg-primary-fixed text-on-primary-fixed px-space-sm py-0.5 rounded-full font-semibold">Obligatoire</span>
+        </div>
+
+        <div class="space-y-space-xs">
+          <label class="block font-label-lg text-label-lg text-on-surface">Catégorie principale de métier</label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-space-sm">
+            <button class="category-btn flex flex-col items-center justify-center p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface transition-all text-center gap-2 group" data-cat="plomberie" type="button">
+              <span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:scale-110 transition-transform">plumbing</span>
+              <span class="font-label-md text-label-md font-semibold text-on-surface">Plomberie &amp; Sanitaire</span>
+            </button>
+            <button class="category-btn flex flex-col items-center justify-center p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface transition-all text-center gap-2 group" data-cat="electricite" type="button">
+              <span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:scale-110 transition-transform">bolt</span>
+              <span class="font-label-md text-label-md font-semibold text-on-surface">Électricité générale</span>
+            </button>
+            <button class="category-btn flex flex-col items-center justify-center p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface transition-all text-center gap-2 group" data-cat="serrurerie" type="button">
+              <span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:scale-110 transition-transform">lock_open</span>
+              <span class="font-label-md text-label-md font-semibold text-on-surface">Serrurerie &amp; Dépannage</span>
+            </button>
+            <button class="category-btn flex flex-col items-center justify-center p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface transition-all text-center gap-2 group" data-cat="peinture" type="button">
+              <span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:scale-110 transition-transform">format_paint</span>
+              <span class="font-label-md text-label-md font-semibold text-on-surface">Peinture &amp; Finition</span>
+            </button>
+            <button class="category-btn flex flex-col items-center justify-center p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface transition-all text-center gap-2 group" data-cat="chauffage" type="button">
+              <span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:scale-110 transition-transform">hvac</span>
+              <span class="font-label-md text-label-md font-semibold text-on-surface">Chauffage &amp; Climatisation</span>
+            </button>
+            <button class="category-btn flex flex-col items-center justify-center p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface transition-all text-center gap-2 group" data-cat="jardinage" type="button">
+              <span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:scale-110 transition-transform">yard</span>
+              <span class="font-label-md text-label-md font-semibold text-on-surface">Jardinage &amp; Aménagement</span>
+            </button>
+          </div>
+          {% include "services/_errors.html" with errors=form.category.errors %}
+        </div>
+
+        <div class="space-y-space-xs">
+          <div class="flex items-center justify-between">
+            <label class="font-label-lg text-label-lg text-on-surface" for="id_name">Intitulé précis de la prestation</label>
+            <span class="font-body-sm text-body-sm text-on-surface-variant">Recommandation SEO</span>
+          </div>
+          <div class="relative">
+            {{ form.name }}
+            <span id="titleCheck" class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-secondary hidden">check_circle</span>
+          </div>
+          {% include "services/_errors.html" with errors=form.name.errors %}
+          <div class="flex flex-wrap gap-2 pt-1">
+            <span class="font-label-sm text-label-sm text-on-surface-variant">Suggestions :</span>
+            <button class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container hover:bg-surface-container-high text-primary transition-colors" onclick="setTitle('Remplacement robinetterie et mitigeur évier')" type="button">Remplacement mitigeur</button>
+            <button class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container hover:bg-surface-container-high text-primary transition-colors" onclick="setTitle('Débouchage canalisation sous pression')" type="button">Débouchage haute pression</button>
+            <button class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container hover:bg-surface-container-high text-primary transition-colors" onclick="setTitle('Pose de ballon thermodynamique certifié RGE')" type="button">Ballon thermodynamique</button>
+          </div>
+        </div>
+
+        <div class="space-y-space-xs">
+          <div class="flex items-center justify-between">
+            <label class="font-label-lg text-label-lg text-on-surface" for="id_description">Description détaillée &amp; périmètre technique</label>
+            <span class="font-label-sm text-label-sm text-on-surface-variant" id="charCount">0 / 1000 caractères</span>
+          </div>
+          {{ form.description }}
+          {% include "services/_errors.html" with errors=form.description.errors %}
+          <p class="font-body-sm text-body-sm text-on-surface-variant">Indiquez distinctement les exclusions matérielles pour éviter tout litige lors du déblocage des fonds.</p>
+        </div>
+
+        <div class="space-y-space-xs">
+          <label class="block font-label-lg text-label-lg text-on-surface">Gestion des fournitures &amp; pièces détachées</label>
+          {% with sup=form.supplies.value|default:'artisan' %}
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-space-sm">
+            <label class="cursor-pointer flex items-start gap-space-sm p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors">
+              <input class="mt-1 accent-primary" name="supplies" type="radio" value="artisan" {% if sup == 'artisan' %}checked{% endif %}/>
+              <div>
+                <span class="block font-label-md text-label-md font-semibold text-on-surface">Fournies par l'artisan</span>
+                <span class="font-body-sm text-body-sm text-on-surface-variant">Matériel professionnel garanti par votre garantie décennale</span>
+              </div>
+            </label>
+            <label class="cursor-pointer flex items-start gap-space-sm p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors">
+              <input class="mt-1 accent-primary" name="supplies" type="radio" value="client" {% if sup == 'client' %}checked{% endif %}/>
+              <div>
+                <span class="block font-label-md text-label-md font-semibold text-on-surface">À la charge du client</span>
+                <span class="font-body-sm text-body-sm text-on-surface-variant">L'artisan intervient uniquement pour la main d'œuvre de pose</span>
+              </div>
+            </label>
+            <label class="cursor-pointer flex items-start gap-space-sm p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors">
+              <input class="mt-1 accent-primary" name="supplies" type="radio" value="devis" {% if sup == 'devis' %}checked{% endif %}/>
+              <div>
+                <span class="block font-label-md text-label-md font-semibold text-on-surface">Au choix après diagnostic</span>
+                <span class="font-body-sm text-body-sm text-on-surface-variant">Ajustement sur devis préalable avant intervention</span>
+              </div>
+            </label>
+          </div>
+          {% endwith %}
+        </div>
+      </section>
+
+      <!-- Section 2 -->
+      <section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-space-lg">
+        <div class="flex items-center justify-between pb-space-sm bg-surface-container-low -mx-space-lg -mt-space-lg px-space-lg py-space-md rounded-t-xl">
+          <div class="flex items-center gap-space-sm">
+            <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md text-label-md font-bold">2</div>
+            <div>
+              <h2 class="font-headline-sm text-headline-sm text-primary">Modèle de tarification &amp; Rémunération</h2>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Barème de prix appliqué et calcul instantané de votre versement net</p>
+            </div>
+          </div>
+          <span class="font-label-sm text-label-sm bg-secondary-container text-on-secondary-container px-space-sm py-0.5 rounded-full font-semibold">Garantie AXA Pro</span>
+        </div>
+
+        <div class="space-y-space-xs">
+          <label class="block font-label-lg text-label-lg text-on-surface">Mode de facturation principal</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm">
+            <button class="pricing-card p-space-md rounded-xl bg-surface-container-low text-left hover:bg-surface-container transition-all flex flex-col justify-between h-28" data-pricing="horaire" type="button">
+              <div class="flex justify-between items-start">
+                <span class="font-label-md text-label-md font-semibold text-on-surface">Tarif horaire</span>
+                <span class="material-symbols-outlined text-[20px] text-on-surface-variant">schedule</span>
+              </div>
+              <div>
+                <span class="font-headline-sm text-headline-sm text-on-surface"><span class="card-price">0</span> € <span class="font-body-sm text-body-sm text-on-surface-variant">/ h</span></span>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">Min. 1h d'intervention</p>
+              </div>
+            </button>
+            <button class="pricing-card p-space-md rounded-xl bg-surface-container-low text-left hover:bg-surface-container transition-all flex flex-col justify-between h-28" data-pricing="forfait" type="button">
+              <div class="flex justify-between items-start">
+                <span class="font-label-md text-label-md font-semibold text-on-surface">Forfait fixe</span>
+                <span class="material-symbols-outlined text-[20px] text-on-surface-variant">price_check</span>
+              </div>
+              <div>
+                <span class="font-headline-sm text-headline-sm text-on-surface"><span class="card-price">0</span> €</span>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">Prestation clé en main</p>
+              </div>
+            </button>
+            <button class="pricing-card p-space-md rounded-xl bg-surface-container-low text-left hover:bg-surface-container transition-all flex flex-col justify-between h-28" data-pricing="devis" type="button">
+              <div class="flex justify-between items-start">
+                <span class="font-label-md text-label-md font-semibold text-on-surface">Sur devis libre</span>
+                <span class="material-symbols-outlined text-[20px] text-on-surface-variant">request_quote</span>
+              </div>
+              <div>
+                <span class="font-headline-sm text-headline-sm text-on-surface">Diagnostic</span>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">Visite préalable 0 €</p>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md bg-surface-container-low p-space-md rounded-xl">
+          <div class="space-y-1">
+            <label class="font-label-md text-label-md font-semibold text-on-surface" for="id_price">Montant brut facturé au client (€ HT)</label>
+            <div class="relative">
+              {{ form.price }}
+              <span class="absolute right-4 top-2.5 font-label-lg text-label-lg font-bold text-on-surface-variant">€ HT</span>
+            </div>
+            <p class="font-label-sm text-label-sm text-on-surface-variant" id="ttcText">Soit 0,00 € TTC avec TVA 10% appliquée</p>
+            {% include "services/_errors.html" with errors=form.price.errors %}
+          </div>
+          <div class="space-y-1">
+            <label class="font-label-md text-label-md font-semibold text-on-surface" for="id_travel_fee">Frais de déplacement</label>
+            {{ form.travel_fee }}
+            <p class="font-label-sm text-label-sm text-on-surface-variant">Assurance trajet comprise par HomeConnect</p>
+            {% include "services/_errors.html" with errors=form.travel_fee.errors %}
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between p-space-md rounded-xl bg-surface-container-high/60">
+          <div class="flex items-start gap-space-sm max-w-xl">
+            <span class="material-symbols-outlined text-secondary text-[24px] mt-0.5">e911_emergency</span>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-label-lg text-label-lg font-bold text-on-surface">Option intervention d'urgence / Astreinte 24-7</span>
+                <span class="px-2 py-0.5 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm">+30% appliqué</span>
+              </div>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Permet aux clients de solliciter une intervention dans les 2 heures le week-end ou en soirée avec majoration tarifaire automatique.</p>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input class="sr-only peer" id="urgencyToggle" name="has_urgency" type="checkbox" {% if form.has_urgency.value %}checked{% endif %}/>
+            <div class="w-12 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+          </label>
+        </div>
+
+        <div class="rounded-xl p-space-md bg-surface-container text-on-surface space-y-space-md">
+          <div class="flex items-center justify-between border-b border-surface-container-highest pb-space-xs">
+            <div class="flex items-center gap-space-xs">
+              <span class="material-symbols-outlined text-primary text-[20px]">calculate</span>
+              <span class="font-label-lg text-label-lg font-bold text-primary">Simulateur de virement net artisan</span>
+            </div>
+            <span class="font-label-sm text-label-sm text-secondary font-semibold bg-secondary-container px-2 py-0.5 rounded-full">Garantie sous séquestre AXA</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+            <div class="p-space-sm rounded-lg bg-surface-container-lowest">
+              <span class="font-body-sm text-body-sm text-on-surface-variant block">Facturé au client (base 1h + dép.)</span>
+              <span class="font-headline-sm text-headline-sm font-bold text-on-surface" id="simulTotalClient">0,00 €</span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant block">Sécurisé avant votre départ</span>
+            </div>
+            <div class="p-space-sm rounded-lg bg-surface-container-lowest">
+              <span class="font-body-sm text-body-sm text-on-surface-variant block">Frais de service (10%)</span>
+              <span class="font-headline-sm text-headline-sm font-bold text-error" id="simulFees">- 0,00 €</span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant block">0 € d'abonnement mensuel</span>
+            </div>
+            <div class="p-space-sm rounded-lg bg-secondary text-on-secondary shadow-md">
+              <span class="font-body-sm text-body-sm text-secondary-fixed block">Votre versement net garanti</span>
+              <span class="font-headline-sm text-headline-sm font-bold text-on-secondary" id="simulNet">0,00 €</span>
+              <span class="font-label-sm text-label-sm text-secondary-fixed block">Virement sous 48h ouvrées</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3 -->
+      <section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-space-lg">
+        <div class="flex items-center justify-between pb-space-sm bg-surface-container-low -mx-space-lg -mt-space-lg px-space-lg py-space-md rounded-t-xl">
+          <div class="flex items-center gap-space-sm">
+            <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md text-label-md font-bold">3</div>
+            <div>
+              <h2 class="font-headline-sm text-headline-sm text-primary">Zone d'intervention &amp; Disponibilité</h2>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Périmètre kilométrique et justificatifs d'assurance</p>
+            </div>
+          </div>
+          <span class="font-label-sm text-label-sm bg-primary-fixed text-on-primary-fixed px-space-sm py-0.5 rounded-full font-semibold">Localisation</span>
+        </div>
+
+        <div class="space-y-space-xs">
+          <label class="block font-label-lg text-label-lg text-on-surface" for="id_base_city">Ville de départ (votre siège)</label>
+          {{ form.base_city }}
+          {% include "services/_errors.html" with errors=form.base_city.errors %}
+        </div>
+
+        <div class="space-y-space-xs">
+          <div class="flex items-center justify-between">
+            <label class="font-label-lg text-label-lg text-on-surface" for="radiusSlider">Rayon d'action depuis <span id="cityLabel">votre siège</span></label>
+            <span class="font-headline-sm text-headline-sm font-bold text-primary" id="radiusVal">20 km</span>
+          </div>
+          <input class="w-full accent-primary h-2 bg-surface-container rounded-lg cursor-pointer" id="radiusSlider" name="radius_km" max="80" min="5" step="5" type="range" value="{{ form.radius_km.value|default:20 }}"/>
+          <div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+            <span>5 km (Hyper-centre)</span><span>25 km (Métropole)</span><span>50 km (Région)</span><span>80 km max</span>
+          </div>
+          {% include "services/_errors.html" with errors=form.radius_km.errors %}
+        </div>
+
+        <div class="space-y-space-xs">
+          <label class="block font-label-lg text-label-lg text-on-surface">Délai minimum avant créneau réservable</label>
+          {% with lt=form.lead_time_hours.value|stringformat:"s" %}
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-space-sm">
+            <label class="cursor-pointer text-center p-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container">
+              <input class="sr-only peer" name="lead_time_hours" type="radio" value="2" {% if lt == '2' %}checked{% endif %}/>
+              <div class="py-1 rounded-lg peer-checked:bg-primary peer-checked:text-on-primary font-label-md text-label-md font-semibold text-on-surface">2 heures</div>
+              <span class="text-[11px] text-on-surface-variant block mt-1">Dépannage express</span>
+            </label>
+            <label class="cursor-pointer text-center p-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container">
+              <input class="sr-only peer" name="lead_time_hours" type="radio" value="12" {% if lt == '12' %}checked{% endif %}/>
+              <div class="py-1 rounded-lg peer-checked:bg-primary peer-checked:text-on-primary font-label-md text-label-md font-semibold text-on-surface">12 heures</div>
+              <span class="text-[11px] text-on-surface-variant block mt-1">Demi-journée</span>
+            </label>
+            <label class="cursor-pointer text-center p-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container">
+              <input class="sr-only peer" name="lead_time_hours" type="radio" value="24" {% if lt == '24' %}checked{% endif %}/>
+              <div class="py-1 rounded-lg peer-checked:bg-primary peer-checked:text-on-primary font-label-md text-label-md font-semibold text-on-surface">24 heures</div>
+              <span class="text-[11px] text-on-surface-variant block mt-1">Recommandé</span>
+            </label>
+            <label class="cursor-pointer text-center p-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container">
+              <input class="sr-only peer" name="lead_time_hours" type="radio" value="48" {% if lt == '48' %}checked{% endif %}/>
+              <div class="py-1 rounded-lg peer-checked:bg-primary peer-checked:text-on-primary font-label-md text-label-md font-semibold text-on-surface">48 heures</div>
+              <span class="text-[11px] text-on-surface-variant block mt-1">Gros travaux</span>
+            </label>
+          </div>
+          {% endwith %}
+          {% include "services/_errors.html" with errors=form.lead_time_hours.errors %}
+        </div>
+
+        <div class="space-y-space-xs">
+          <label class="block font-label-lg text-label-lg text-on-surface">Labels &amp; Certifications spécifiques à cette prestation</label>
+          <div class="p-space-md rounded-xl bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-md">
+            <div class="flex items-center gap-space-md">
+              <div class="w-12 h-12 rounded-xl bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm">
+                <span class="material-symbols-outlined text-[28px]">verified_user</span>
+              </div>
+              <div>
+                <span class="font-label-lg text-label-lg font-bold text-on-surface block">Garantie Décennale &amp; RGE QualiBat</span>
+                <span class="font-body-sm text-body-sm text-secondary font-medium">Attestation 2024 active (Reconnue par AXA)</span>
+              </div>
+            </div>
+            <button class="px-space-md py-space-xs rounded-xl bg-surface-container-lowest hover:bg-surface-container-high text-primary font-label-md text-label-md transition-colors flex items-center gap-1 shadow-sm" type="button">
+              <span class="material-symbols-outlined text-[18px]">upload_file</span>Ajouter un justificatif
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Barre d'action -->
+      <div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex flex-col sm:flex-row items-center justify-between gap-space-md">
+        <button type="button" onclick="submitAs('draft')" class="w-full sm:w-auto px-space-lg py-space-sm rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-lg text-label-lg transition-colors flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[20px]">drafts</span>Enregistrer le brouillon
+        </button>
+        <button type="button" onclick="submitAs('publish')" class="w-full sm:w-auto px-space-xl py-space-sm rounded-xl bg-secondary hover:bg-secondary/90 text-on-secondary font-label-lg text-label-lg font-bold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
+          <span class="material-symbols-outlined text-[20px]">check_circle</span>Publier le service et activer le matching
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- COLONNE DROITE -->
+  <div class="lg:col-span-4 space-y-space-lg lg:sticky lg:top-36">
+    <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-md space-y-space-md">
+      <div class="flex items-center justify-between border-b border-surface-container-high pb-space-xs">
+        <span class="font-label-md text-label-md font-bold text-primary uppercase tracking-wider flex items-center gap-1">
+          <span class="material-symbols-outlined text-[16px]">visibility</span>Aperçu en direct (Vue client)
+        </span>
+        <span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-secondary bg-secondary-container px-2 py-0.5 rounded-full font-semibold">
+          <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>En ligne
+        </span>
+      </div>
+
+      <div class="rounded-xl overflow-hidden bg-surface-container-low shadow-sm">
+        <div class="relative h-40 w-full overflow-hidden">
+          <img class="w-full h-full object-cover" alt="Chauffe-eau installé dans un local technique" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZa8J-yys7F7g1c5VBPP4I4WEzrplpGwp5XFna2aL9L-_uLS21DLc5eYb26PevQLlHUU4efxhU4n0iuk-afXYslMqMMgmCC-o-LHn7AqGQtRurFYW4h3idTAL3R1DWAQyy0tjzws3oF0HpQP7ig6qzgRdSxpu7u0QuGs8gH3NlldGUxjHqN1CePpLYClyJQSA7OLMsBlWFs8qLicnW_4y5CpTGswh9Yaxef-6bpZsdn_hUTulBGUgL"/>
+          <div class="absolute top-3 left-3 flex gap-1">
+            <span class="px-2.5 py-1 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm font-bold shadow-sm flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">verified</span>Certifié Pro
+            </span>
+          </div>
+          <div class="absolute bottom-3 right-3 bg-surface-container-lowest/90 backdrop-blur px-2 py-1 rounded-lg shadow-sm">
+            <span class="font-label-sm text-label-sm text-on-surface font-bold" id="previewCity">Votre ville</span>
+          </div>
+        </div>
+        <div class="p-space-md space-y-space-sm bg-surface-container-lowest">
+          <div class="flex items-center justify-between">
+            <span class="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-primary" id="previewCategoryBadge">Plomberie &amp; Sanitaire</span>
+            <div class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+              <span class="font-label-md text-label-md font-bold text-on-surface">4,9</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">(48)</span>
+            </div>
+          </div>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold line-clamp-2 leading-snug" id="previewTitle">Intitulé de la prestation</h3>
+          <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2" id="previewDesc">Description de la prestation...</p>
+          <div class="pt-space-xs border-t border-surface-container-high flex items-center justify-between">
+            <div>
+              <span class="font-body-sm text-body-sm text-on-surface-variant block">À partir de</span>
+              <span class="font-headline-sm text-headline-sm font-bold text-primary" id="previewPrice">0 €</span>
+            </div>
+            <button class="px-space-md py-1.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary/90 transition-colors shadow-sm" type="button">Demander un devis</button>
+          </div>
+        </div>
+        <div class="bg-surface-container-high px-space-md py-2 flex items-center justify-between text-[11px] text-on-surface-variant">
+          <span class="flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-[14px] text-secondary">security</span>Paiement sous séquestre AXA</span>
+          <span class="font-semibold text-secondary" id="previewUrgency">Astreinte non proposée</span>
+        </div>
+      </div>
+      <p class="font-body-sm text-body-sm text-on-surface-variant text-center">Mis à jour instantanément selon vos saisies.</p>
+    </div>
+
+    <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm space-y-space-sm">
+      <div class="flex items-center gap-space-xs text-primary font-label-lg text-label-lg font-bold">
+        <span class="material-symbols-outlined text-[20px] text-secondary">tips_and_updates</span>Conseils pour maximiser vos demandes
+      </div>
+      <ul class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant">
+        <li class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary text-[16px] mt-0.5">check</span><span><strong>Titre précis :</strong> Évitez les termes vagues comme "Bricolage". Précisez le type d'appareil ou d'intervention.</span></li>
+        <li class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary text-[16px] mt-0.5">check</span><span><strong>Fournitures détaillées :</strong> Les clients choisissent 3x plus vite les artisans précisant qui achète le matériel.</span></li>
+        <li class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary text-[16px] mt-0.5">check</span><span><strong>Option d'urgence :</strong> Activez le mode 24/7 pour recevoir les dépannages prioritaires le soir et week-end (+30%).</span></li>
+      </ul>
+    </div>
+
+    <div class="bg-surface-container-low rounded-xl p-space-md shadow-sm flex items-center gap-space-md">
+      <div class="relative">
+        <img class="w-12 h-12 rounded-full object-cover" alt="Conseillère HomeConnect" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDD28ObKxINhG6l5F86hVAoHwY-bhiiPrCDLPZqgFZYZQDb98zVMiywkAbfpvrUnnV93Q6IbkExdkTcQ5M6VtG7xaZFR66G1AisAnRcJ6rvu9WfT4JeawQZ5419krHK-O7fc7nbEuKhQGMfBdNYVxrPWYQ-1wKqUy-lDY6-zqClFBoO8TRZqFq7CjkTf8J9oZ2Y__OWS3ITwWDvppQB-1tMkdj1unMuu5dVveQVp801qlI6ECIVf1B9"/>
+        <span class="w-3.5 h-3.5 bg-secondary rounded-full absolute bottom-0 right-0 ring-2 ring-surface-container-low"></span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <span class="font-label-md text-label-md font-bold text-on-surface block truncate">Claire Moreau</span>
+        <span class="font-body-sm text-body-sm text-on-surface-variant block">Votre référente Pro Gironde</span>
+        <a class="font-label-sm text-label-sm text-primary font-semibold hover:underline flex items-center gap-1 mt-0.5" href="#">
+          <span class="material-symbols-outlined text-[14px]">call</span>Contacter au 05 56 00 12 34
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n, min = 0) => Number(n).toLocaleString('fr-FR', { minimumFractionDigits: min, maximumFractionDigits: 2 });
+
+  function setTitle(val) { $('id_name').value = val; refresh(); }
+
+  function submitAs(action) {
+    $('actionInput').value = action;
+    $('service-form').requestSubmit();
+  }
+
+  function paintCategories() {
+    const val = $('catInput').value;
+    document.querySelectorAll('.category-btn').forEach((b) => {
+      const on = b.dataset.cat === val;
+      const icon = b.querySelector('.material-symbols-outlined');
+      const label = b.querySelector('span:last-child');
+      b.classList.toggle('ring-2', on);
+      b.classList.toggle('ring-primary', on);
+      icon.classList.toggle('text-primary', on);
+      icon.classList.toggle('text-on-surface-variant', !on);
+      label.classList.toggle('text-primary', on);
+      label.classList.toggle('text-on-surface', !on);
+      if (on) $('previewCategoryBadge').textContent = label.textContent;
+    });
+  }
+
+  function paintPricing() {
+    const val = $('pricingInput').value;
+    document.querySelectorAll('.pricing-card').forEach((c) => {
+      const on = c.dataset.pricing === val;
+      c.classList.toggle('ring-2', on);
+      c.classList.toggle('ring-primary', on);
+    });
+  }
+
+  function refresh() {
+    const title = $('id_name').value.trim();
+    $('previewTitle').textContent = title || 'Intitulé de la prestation';
+    $('titleCheck').classList.toggle('hidden', !title);
+
+    const desc = $('id_description').value;
+    $('previewDesc').textContent = desc || 'Description de la prestation...';
+    $('charCount').textContent = `${desc.length} / 1000 caractères`;
+
+    const price = parseFloat($('id_price').value) || 0;
+    const travel = parseFloat($('id_travel_fee').value) || 0;
+    const total = price + travel;
+    const fees = total * 0.10;
+    $('simulTotalClient').textContent = fmt(total, 2) + ' €';
+    $('simulFees').textContent = '- ' + fmt(fees, 2) + ' €';
+    $('simulNet').textContent = fmt(total - fees, 2) + ' €';
+    $('ttcText').textContent = `Soit ${fmt(price * 1.1, 2)} € TTC avec TVA 10% appliquée`;
+    document.querySelectorAll('.card-price').forEach((s) => { s.textContent = fmt(price); });
+
+    const type = $('pricingInput').value;
+    const unit = ' <span class="font-label-sm text-label-sm font-normal text-on-surface-variant">/ h</span>';
+    $('previewPrice').innerHTML = type === 'devis' ? 'Sur devis' : fmt(price) + ' €' + (type === 'horaire' ? unit : '');
+
+    const city = $('id_base_city').value.trim();
+    $('cityLabel').textContent = city || 'votre siège';
+    $('previewCity').textContent = city || 'Votre ville';
+
+    $('radiusVal').textContent = $('radiusSlider').value + ' km';
+    $('previewUrgency').textContent = $('urgencyToggle').checked ? 'Astreinte 24/7 active' : 'Astreinte non proposée';
+  }
+
+  document.querySelectorAll('.category-btn').forEach((b) => b.addEventListener('click', () => {
+    $('catInput').value = b.dataset.cat;
+    paintCategories();
+  }));
+  document.querySelectorAll('.pricing-card').forEach((c) => c.addEventListener('click', () => {
+    $('pricingInput').value = c.dataset.pricing;
+    paintPricing();
+    refresh();
+  }));
+  ['id_name', 'id_description', 'id_price', 'id_travel_fee', 'id_base_city', 'radiusSlider', 'urgencyToggle']
+    .forEach((id) => { $(id).addEventListener('input', refresh); $(id).addEventListener('change', refresh); });
+
+  paintCategories();
+  paintPricing();
+  refresh();
+</script>
+{% endblock %}

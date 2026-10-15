@@ -1,0 +1,7 @@
+<div class="flex flex-col gap-1.5">
+  <label for="{{ field.id_for_label }}" class="text-sm font-semibold">{{ field.label }}</label>
+  {{ field }}
+  {% for error in field.errors %}
+    <p class="text-xs text-error">{{ error }}</p>
+  {% endfor %}
+</div>

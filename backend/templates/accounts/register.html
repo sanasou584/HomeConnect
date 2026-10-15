@@ -1,0 +1,105 @@
+{% extends "base_auth.html" %}
+{% block title %}Inscription · HomeConnect{% endblock %}
+
+{% block content %}
+<div class="w-full bg-surface-container-lowest rounded-full shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+
+  {% include "accounts/_auth_side.html" with title="Rejoignez HomeConnect" subtitle="Créez votre compte en une minute, que vous cherchiez un service ou que vous le proposiez, et gérez vos rendez-vous au même endroit." %}
+
+  <div class="lg:col-span-7 p-space-lg lg:p-space-xl flex flex-col justify-center bg-surface-container-lowest">
+    <div class="w-full max-w-lg mx-auto flex flex-col gap-space-lg">
+
+      <div class="flex flex-col gap-space-xs">
+        <div class="flex items-center justify-between">
+          <h2 class="font-headline-xl text-headline-xl font-bold text-on-surface tracking-tight">Inscription</h2>
+          <div class="flex items-center gap-1 text-secondary bg-surface-container-low px-space-sm py-1 rounded-full">
+            <span class="material-symbols-outlined text-[16px]">lock</span>
+            <span class="font-label-sm text-label-sm font-semibold">SSL 256-bit</span>
+          </div>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          Choisissez votre profil puis renseignez vos informations.
+        </p>
+      </div>
+
+      {% if form.non_field_errors %}
+      <div class="flex items-start gap-space-xs p-space-md rounded-xl bg-error-container text-on-error-container font-body-sm text-body-sm">
+        <span class="material-symbols-outlined text-[20px]">error</span>
+        <span>{{ form.non_field_errors.0 }}</span>
+      </div>
+      {% endif %}
+
+      <form class="flex flex-col gap-space-md" method="post">
+        {% csrf_token %}
+
+        <!-- Sélecteur de rôle (style onglets Stitch) -->
+        <div class="flex flex-col gap-1.5">
+          <div class="flex p-1 bg-surface-container rounded-xl" role="radiogroup">
+            {% for value, label in form.role.field.choices %}
+            <label class="flex-1 cursor-pointer">
+              <input type="radio" name="role" value="{{ value }}" class="peer sr-only" {% if form.role.value == value %}checked{% endif %}>
+              <span class="flex items-center justify-center gap-space-xs py-2 rounded-xl font-label-lg text-label-lg transition-all duration-200 text-on-surface-variant hover:text-on-surface peer-checked:bg-surface-container-lowest peer-checked:text-primary peer-checked:shadow-sm">
+                <span class="material-symbols-outlined text-[18px]">{% if value == 'client' %}person{% else %}construction{% endif %}</span>
+                <span>{% if value == 'client' %}Je suis Client{% else %}Je suis Prestataire{% endif %}</span>
+              </span>
+            </label>
+            {% endfor %}
+          </div>
+          {% for error in form.role.errors %}<p class="font-label-md text-label-md text-error">{{ error }}</p>{% endfor %}
+        </div>
+
+        {% include "accounts/_field.html" with field=form.username label="Nom d'utilisateur" icon="person" placeholder="votre_identifiant" autocomplete="username" %}
+        {% include "accounts/_field.html" with field=form.email label="Adresse email" icon="mail" type="email" placeholder="nom@exemple.fr" autocomplete="email" %}
+
+        <div class="flex flex-col gap-space-xs">
+          {% include "accounts/_field.html" with field=form.password1 label="Mot de passe" icon="lock" type="password" placeholder="8 caractères minimum" autocomplete="new-password" %}
+          <div class="h-1.5 bg-surface-container rounded-full overflow-hidden">
+            <div id="pwd-bar" class="h-full w-0 transition-all duration-300"></div>
+          </div>
+          <p id="pwd-label" class="font-label-md text-label-md text-on-surface-variant min-h-[1rem]"></p>
+        </div>
+
+        {% include "accounts/_field.html" with field=form.password2 label="Confirmer le mot de passe" icon="lock_reset" type="password" placeholder="Répétez le mot de passe" autocomplete="new-password" %}
+
+        <button class="w-full h-12 bg-primary hover:bg-tertiary-container active:bg-primary-container text-on-primary font-label-lg text-label-lg rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-space-xs mt-space-xs cursor-pointer" type="submit">
+          <span class="material-symbols-outlined text-[20px]">how_to_reg</span>
+          <span>Créer mon compte</span>
+        </button>
+      </form>
+
+      <div class="flex items-center justify-center gap-space-xs pt-space-xs text-center">
+        <span class="font-body-sm text-body-sm text-on-surface-variant">Vous avez déjà un compte ?</span>
+        <a class="font-label-md text-label-md text-primary font-bold hover:underline" href="{% url 'login' %}">Se connecter</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const pwd = document.getElementById("id_password1");
+  const bar = document.getElementById("pwd-bar");
+  const label = document.getElementById("pwd-label");
+  const levels = [
+    ["0%", "transparent", ""],
+    ["25%", "#ba1a1a", "Faible"],
+    ["50%", "#f59e0b", "Moyen"],
+    ["75%", "#006d3d", "Bon"],
+    ["100%", "#006d3d", "Excellent"],
+  ];
+  pwd.addEventListener("input", () => {
+    const v = pwd.value;
+    let score = 0;
+    if (v.length >= 8) score++;
+    if (/[a-z]/.test(v) && /[A-Z]/.test(v)) score++;
+    if (/\d/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+    if (!v) score = 0;
+    const [width, color, text] = levels[score];
+    bar.style.width = width;
+    bar.style.background = color;
+    label.textContent = text ? "Force du mot de passe : " + text : "";
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}HomeConnect{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        fontFamily: { sans: ["Inter", "sans-serif"] },
+        colors: {
+          primary: "#00375e", "primary-container": "#1f4e79", "primary-fixed-dim": "#a0cafc",
+          secondary: "#006d3d", "secondary-fixed": "#9af6b8",
+          "secondary-container": "#97f3b5", "on-secondary-container": "#047240",
+          background: "#f9f9ff", "surface-container": "#e7eeff",
+          "on-surface": "#111c2d", "on-surface-variant": "#42474f",
+          outline: "#72777f", "outline-variant": "#c2c7d0",
+          error: "#ba1a1a", "error-container": "#ffdad6", "on-error-container": "#93000a"
+        }
+      } }
+    };
+  </script>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="bg-background font-sans text-on-surface antialiased min-h-screen flex flex-col">
+
+  {% block header %}
+  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur shadow-sm">
+    <div class="h-16 max-w-7xl mx-auto px-4 flex items-center justify-between">
+      <a href="{% url 'home' %}" class="flex items-center gap-2 text-primary">
+        <span class="material-symbols-outlined text-[28px]">home_repair_service</span>
+        <span class="text-lg font-bold tracking-tight">HomeConnect</span>
+      </a>
+
+      <nav class="flex items-center gap-3">
+        {% if user.is_authenticated %}
+        {% if user.role == 'provider' %}
+  <a href="{% url 'service_list' %}" class="hidden sm:inline text-sm font-semibold text-on-surface-variant hover:text-primary">
+    Mes services
+  </a>
+{% endif %}
+          <a href="{% url 'profile' %}" class="flex items-center gap-2 text-sm font-semibold hover:text-primary">
+            <span class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">{{ user.username|slice:":1"|upper }}</span>
+            <span class="hidden sm:inline">{{ user.username }}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-surface-container text-primary">{{ user.get_role_display }}</span>
+          </a>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="h-9 px-3 rounded-xl border border-outline-variant text-sm font-semibold hover:bg-surface-container transition">
+              Déconnexion
+            </button>
+          </form>
+        {% else %}
+          <a href="{% url 'login' %}" class="text-sm font-semibold text-on-surface-variant hover:text-on-surface">Connexion</a>
+          <a href="{% url 'register' %}" class="h-9 px-4 inline-flex items-center rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-container transition">
+            Inscription
+          </a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+  {% endblock %}
+
+  {% block main %}
+  <main class="flex-1 w-full max-w-7xl mx-auto px-4 py-8">
+    {% include "_messages.html" %}
+    {% block content %}{% endblock %}
+  </main>
+  {% endblock %}
+
+  <footer class="py-4 text-center text-xs text-on-surface-variant">
+    © {% now "Y" %} HomeConnect
+  </footer>
+
+  <script>
+    function togglePwd(btn) {
+      const input = btn.parentElement.querySelector("input");
+      const icon = btn.querySelector("span");
+      const show = input.type === "password";
+      input.type = show ? "text" : "password";
+      icon.textContent = show ? "visibility_off" : "visibility";
+    }
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
