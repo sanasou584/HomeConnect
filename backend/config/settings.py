@@ -121,8 +121,8 @@ USE_TZ = True
 
 AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "home"
-LOGOUT_REDIRECT_URL = "home"
+LOGIN_REDIRECT_URL = "post_login"
+LOGOUT_REDIRECT_URL = "login"
 
 
 # Static files (CSS, JavaScript, Images)

@@ -7,13 +7,13 @@ from .forms import ProfileForm, RegisterForm
 
 def register(request):
     if request.user.is_authenticated:
-        return redirect("home")
+        return redirect("post_login")
     form = RegisterForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         user = form.save()
         login(request, user)
-        messages.success(request, "Compte créé, bienvenue sur HomeConnect !")
-        return redirect("home")
+        #messages.success(request, "Compte créé, bienvenue sur HomeConnect !")
+        return redirect("post_login")
     return render(request, "accounts/register.html", {"form": form})
 
 
@@ -25,3 +25,9 @@ def profile(request):
         messages.success(request, "Profil mis à jour.")
         return redirect("profile")
     return render(request, "accounts/profile.html", {"form": form})
+
+@login_required
+def post_login(request):
+    if request.user.role == "client":
+        return redirect("client_dashboard")
+    return redirect("service_list")

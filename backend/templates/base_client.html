@@ -1,0 +1,43 @@
+{% extends "base_dashboard.html" %}
+
+{% block role_pills %}
+  <span class="px-space-sm py-space-xs rounded-full bg-surface-container-lowest text-primary font-label-sm text-label-sm uppercase tracking-wider">Client</span>
+{% endblock %}
+
+{% block header_action %}
+  <a href="{% url 'client_dashboard' %}#services"
+     class="hidden sm:inline-flex items-center gap-space-xs h-10 px-space-md rounded-xl bg-secondary text-on-secondary font-label-lg text-label-lg shadow-sm hover:opacity-95 transition-all">
+    <span class="material-symbols-outlined text-[18px]">search</span>Trouver un service
+  </a>
+{% endblock %}
+
+{% block space_label %}Espace Client{% endblock %}
+{% block support_label %}Support 7j/7{% endblock %}
+
+{% block sidebar_nav %}
+  <a href="{% url 'client_dashboard' %}"
+     class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl font-label-lg text-label-lg transition-colors {% if n == 'client_dashboard' %}bg-surface-container text-primary{% else %}text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface{% endif %}">
+    <span class="material-symbols-outlined text-[20px]">dashboard</span>Tableau de bord
+  </a>
+  <a href="{% url 'client_dashboard' %}#services"
+     class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors">
+    <span class="material-symbols-outlined text-[20px]">home_repair_service</span>Tous les services
+  </a>
+  <a href="{% url 'client_dashboard' %}#reservations"
+     class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors">
+    <span class="material-symbols-outlined text-[20px]">event</span>Mes réservations
+  </a>
+  <a href="{% url 'profile' %}"
+     class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl font-label-lg text-label-lg transition-colors {% if n == 'profile' %}bg-surface-container text-primary{% else %}text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface{% endif %}">
+    <span class="material-symbols-outlined text-[20px]">account_circle</span>Mon profil
+  </a>
+{% endblock %}
+
+{% block sidebar_card %}
+  <div class="p-space-md rounded-xl bg-surface-container-low">
+    <p class="font-label-lg text-label-lg text-secondary flex items-center gap-space-xs">
+      <span class="material-symbols-outlined text-[18px]">verified_user</span>Prestataires vérifiés
+    </p>
+    <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Réservez en toute confiance, annulation possible avant l'intervention.</p>
+  </div>
+{% endblock %}

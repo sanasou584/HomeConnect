@@ -2,69 +2,171 @@
 {% block title %}Mes services · HomeConnect{% endblock %}
 
 {% block content %}
-<div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+<!-- En-tête -->
+<div class="flex flex-wrap items-center justify-between gap-space-md mb-space-lg">
   <div>
     <h1 class="font-headline-xl text-headline-xl text-primary tracking-tight">Mes services</h1>
-    <p class="text-sm text-on-surface-variant">{{ services|length }} service{{ services|length|pluralize }}</p>
+    <p class="font-body-md text-body-md text-on-surface-variant">{{ services|length }} service{{ services|length|pluralize }}</p>
   </div>
-  <a href="{% url 'service_create' %}" class="h-11 px-5 inline-flex items-center gap-2 rounded-xl bg-secondary text-on-secondary font-semibold hover:opacity-95 transition">
-    <span class="material-symbols-outlined text-[20px]">add</span> Ajouter un service
+  <a href="{% url 'service_create' %}" class="px-space-lg py-space-sm rounded-xl bg-secondary text-on-secondary font-label-lg text-label-lg font-bold flex items-center gap-2 shadow-md hover:shadow-lg transition-all">
+    <span class="material-symbols-outlined text-[20px]">add_circle</span> Ajouter un service
   </a>
 </div>
 
 {% if services %}
-<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="w-full text-sm text-left">
-      <thead class="bg-surface-container text-on-surface-variant">
-        <tr>
-          <th class="px-5 py-3 font-semibold">Service</th>
-          <th class="px-5 py-3 font-semibold">Catégorie</th>
-          <th class="px-5 py-3 font-semibold">Tarif (HT)</th>
-          <th class="px-5 py-3 font-semibold">Zone d'intervention</th>
-          <th class="px-5 py-3 font-semibold">Statut</th>
-          <th class="px-5 py-3 font-semibold text-right">Actions</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-outline-variant/40">
-        {% for s in services %}
-        <tr class="hover:bg-surface-container/40">
-          <td class="px-5 py-4 font-semibold">{{ s.name }}</td>
-          <td class="px-5 py-4"><span class="inline-flex px-2.5 py-1 rounded-full bg-surface-container text-primary text-xs font-semibold">{{ s.get_category_display }}</span></td>
-          <td class="px-5 py-4 whitespace-nowrap">
-            {% if s.pricing_type == 'horaire' %}{{ s.price|floatformat:2 }} € / h
-            {% elif s.pricing_type == 'forfait' %}{{ s.price|floatformat:2 }} € forfait
-            {% else %}Sur devis{% endif %}
-          </td>
-          <td class="px-5 py-4">{{ s.base_city }} · {{ s.radius_km }} km</td>
-          <td class="px-5 py-4">
-            {% if s.is_active %}
-              <span class="inline-flex px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-semibold">Publié</span>
-            {% else %}
-              <span class="inline-flex px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold">Brouillon</span>
-            {% endif %}
-          </td>
-          <td class="px-5 py-4">
-            <div class="flex justify-end gap-2">
-              <a href="{% url 'service_update' s.pk %}" title="Modifier" class="w-9 h-9 inline-flex items-center justify-center rounded-xl border border-outline-variant hover:bg-surface-container transition">
-                <span class="material-symbols-outlined text-[20px]">edit</span>
-              </a>
-              <a href="{% url 'service_delete' s.pk %}" title="Supprimer" class="w-9 h-9 inline-flex items-center justify-center rounded-xl border border-error/30 text-error hover:bg-error-container transition">
-                <span class="material-symbols-outlined text-[20px]">delete</span>
-              </a>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+<!-- Filtres -->
+<div class="flex flex-wrap gap-space-sm mb-space-lg">
+  <button type="button" data-filter="all" class="filter-btn px-space-md py-space-xs rounded-full font-label-md text-label-md font-semibold transition-all">
+    Tous <span class="count opacity-70"></span>
+  </button>
+  <button type="button" data-filter="published" class="filter-btn px-space-md py-space-xs rounded-full font-label-md text-label-md font-semibold transition-all">
+    Publiés <span class="count opacity-70"></span>
+  </button>
+  <button type="button" data-filter="draft" class="filter-btn px-space-md py-space-xs rounded-full font-label-md text-label-md font-semibold transition-all">
+    Brouillons <span class="count opacity-70"></span>
+  </button>
 </div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-gutter">
+
+  {% for s in services %}
+  <article data-status="{% if s.is_active %}published{% else %}draft{% endif %}"
+           class="service-card bg-surface-container-lowest rounded-xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+
+    <!-- Bandeau coloré par catégorie -->
+    <div class="relative h-36 overflow-hidden bg-gradient-to-br flex items-center justify-center
+      {% if s.category == 'plomberie' %}from-primary-container to-primary
+      {% elif s.category == 'electricite' %}from-amber-500 to-orange-600
+      {% elif s.category == 'serrurerie' %}from-slate-600 to-slate-800
+      {% elif s.category == 'peinture' %}from-fuchsia-500 to-purple-700
+      {% elif s.category == 'chauffage' %}from-red-500 to-orange-600
+      {% else %}from-secondary to-emerald-700{% endif %}">
+      <div class="absolute -right-8 -top-8 w-36 h-36 rounded-[50%] bg-white/10"></div>
+      <div class="absolute -left-6 -bottom-10 w-28 h-28 rounded-[50%] bg-white/10"></div>
+
+      <div class="relative w-20 h-20 rounded-[50%] bg-white/20 backdrop-blur flex items-center justify-center shadow-inner">
+        <span class="material-symbols-outlined text-[44px] text-white">
+          {% if s.category == 'plomberie' %}plumbing{% elif s.category == 'electricite' %}bolt{% elif s.category == 'serrurerie' %}lock_open{% elif s.category == 'peinture' %}format_paint{% elif s.category == 'chauffage' %}hvac{% else %}yard{% endif %}
+        </span>
+      </div>
+
+      <div class="absolute top-3 left-3">
+        {% if s.is_active %}
+          <span class="px-2.5 py-1 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm font-bold shadow-sm flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">verified</span>Publié
+          </span>
+        {% else %}
+          <span class="px-2.5 py-1 rounded-full bg-surface-container-lowest text-on-surface-variant font-label-sm text-label-sm font-bold shadow-sm flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">drafts</span>Brouillon
+          </span>
+        {% endif %}
+      </div>
+
+      <div class="absolute bottom-3 right-3 bg-surface-container-lowest/90 backdrop-blur px-2 py-1 rounded-lg shadow-sm flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px] text-primary">location_on</span>
+        <span class="font-label-sm text-label-sm text-on-surface font-bold">{{ s.base_city }} · {{ s.radius_km }} km</span>
+      </div>
+    </div>
+
+    <!-- Contenu -->
+    <div class="p-space-md flex-1 flex flex-col gap-space-sm">
+      <span class="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-primary">{{ s.get_category_display }}</span>
+      <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold line-clamp-2 leading-snug">{{ s.name }}</h3>
+      <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">{{ s.description|default:"Aucune description." }}</p>
+
+      <!-- Puces -->
+      <div class="flex flex-wrap gap-space-xs">
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+          <span class="material-symbols-outlined text-[14px]">schedule</span>Délai {{ s.lead_time_hours }} h
+        </span>
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+          <span class="material-symbols-outlined text-[14px]">inventory_2</span>
+          {% if s.supplies == 'artisan' %}Fournitures incluses{% elif s.supplies == 'client' %}Fournitures client{% else %}Fournitures sur devis{% endif %}
+        </span>
+        {% if s.has_urgency %}
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
+          <span class="material-symbols-outlined text-[14px]">bolt</span>Astreinte 24/7
+        </span>
+        {% endif %}
+      </div>
+
+      <!-- Prix -->
+      <div class="pt-space-sm border-t border-surface-container-high mt-auto flex items-end justify-between">
+        <div>
+          <span class="font-body-sm text-body-sm text-on-surface-variant block">À partir de</span>
+          <span class="font-headline-md text-headline-md font-bold text-primary">
+            {% if s.pricing_type == 'horaire' %}{{ s.price|floatformat:"-2" }} €{% elif s.pricing_type == 'forfait' %}{{ s.price|floatformat:"-2" }} €{% else %}Sur devis{% endif %}
+          </span>
+        </div>
+        <span class="font-label-sm text-label-sm text-on-surface-variant pb-1">
+          {% if s.pricing_type == 'horaire' %}HT / heure{% elif s.pricing_type == 'forfait' %}HT forfait{% else %}Diagnostic offert{% endif %}
+        </span>
+      </div>
+
+      <!-- Actions -->
+      <div class="grid grid-cols-2 gap-space-sm">
+        <a href="{% url 'service_update' s.pk %}" class="px-space-md py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary/90 transition-colors shadow-sm flex items-center justify-center gap-1">
+          <span class="material-symbols-outlined text-[18px]">edit</span>Modifier
+        </a>
+        <a href="{% url 'service_delete' s.pk %}" class="px-space-md py-2 rounded-xl border border-error/30 text-error font-label-md text-label-md font-semibold hover:bg-error-container transition-colors flex items-center justify-center gap-1">
+          <span class="material-symbols-outlined text-[18px]">delete</span>Supprimer
+        </a>
+      </div>
+    </div>
+  </article>
+  {% endfor %}
+
+  <!-- Carte d'ajout -->
+  <a href="{% url 'service_create' %}" class="rounded-xl border-2 border-dashed border-outline-variant hover:border-primary hover:bg-surface-container-low transition flex flex-col items-center justify-center gap-space-sm p-space-xl text-on-surface-variant hover:text-primary min-h-[22rem]">
+    <span class="material-symbols-outlined text-[40px]">add_circle</span>
+    <span class="font-label-lg text-label-lg">Ajouter un service</span>
+  </a>
+</div>
+
+<p id="noResult" class="hidden text-center font-body-md text-body-md text-on-surface-variant py-space-xl">Aucun service dans cette catégorie.</p>
+
 {% else %}
 <div class="bg-surface-container-lowest rounded-xl shadow-sm p-10 text-center">
   <span class="material-symbols-outlined text-5xl text-outline">home_repair_service</span>
   <p class="mt-2 font-semibold">Aucun service pour l'instant</p>
   <p class="text-sm text-on-surface-variant mt-1">Ajoutez votre premier service pour être visible auprès des clients.</p>
+  <a href="{% url 'service_create' %}" class="mt-4 inline-flex px-space-lg py-space-sm rounded-xl bg-secondary text-on-secondary font-label-lg text-label-lg font-bold items-center gap-2 shadow-md hover:shadow-lg transition-all">
+    <span class="material-symbols-outlined text-[20px]">add_circle</span> Ajouter un service
+  </a>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const cards = document.querySelectorAll('.service-card');
+  const buttons = document.querySelectorAll('.filter-btn');
+  const ON = ['bg-primary', 'text-on-primary', 'shadow-sm'];
+  const OFF = ['bg-surface-container-lowest', 'text-on-surface-variant', 'hover:bg-surface-container'];
+
+  function apply(filter) {
+    let visible = 0;
+    cards.forEach((c) => {
+      const show = filter === 'all' || c.dataset.status === filter;
+      c.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+    buttons.forEach((b) => {
+      const on = b.dataset.filter === filter;
+      ON.forEach((k) => b.classList.toggle(k, on));
+      OFF.forEach((k) => b.classList.toggle(k, !on));
+    });
+    const none = document.getElementById('noResult');
+    if (none) none.classList.toggle('hidden', visible > 0);
+  }
+
+  buttons.forEach((b) => {
+    const f = b.dataset.filter;
+    const n = f === 'all' ? cards.length : [...cards].filter((c) => c.dataset.status === f).length;
+    b.querySelector('.count').textContent = '(' + n + ')';
+    b.addEventListener('click', () => apply(f));
+  });
+
+  if (cards.length) apply('all');
+</script>
 {% endblock %}

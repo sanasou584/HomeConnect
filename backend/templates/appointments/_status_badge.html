@@ -1,0 +1,5 @@
+<span class="inline-flex items-center px-2.5 py-1 rounded-full font-label-sm text-label-sm font-semibold
+  {% if appointment.status == 'confirmed' %}bg-[#D1FAE5] text-[#059669]
+  {% elif appointment.status == 'pending' %}bg-[#FEF3C7] text-[#D97706]
+  {% elif appointment.status == 'completed' %}bg-[#DBEAFE] text-[#2563EB]
+  {% else %}bg-[#FEE2E2] text-[#DC2626]{% endif %}">{{ appointment.get_status_display }}</span>

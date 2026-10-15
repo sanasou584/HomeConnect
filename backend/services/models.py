@@ -13,6 +13,23 @@ TRAVEL_FEE_CHOICES = [
 
 
 class Service(models.Model):
+    
+    @property
+    def urgency_amount(self):
+        """Supplément d'urgence : +30 % de la main d'œuvre (si l'option est proposée)."""
+        if not self.has_urgency:
+            return Decimal("0.00")
+        return (self.price * Decimal("0.30")).quantize(Decimal("0.01"))
+
+    def estimate(self, urgent=False):
+        labour = self.price
+        travel = Decimal(self.travel_fee)
+        urgency = self.urgency_amount if urgent else Decimal("0.00")
+        subtotal = labour + travel + urgency
+        vat = (subtotal * Decimal("0.10")).quantize(Decimal("0.01"))
+        return {"labour": labour, "travel": travel, "urgency": urgency,
+                "subtotal": subtotal, "vat": vat, "total": subtotal + vat}
+    
     class Category(models.TextChoices):
         PLUMBING = "plomberie", "Plomberie & Sanitaire"
         ELECTRICITY = "electricite", "Électricité générale"
